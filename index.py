@@ -8,8 +8,8 @@ from heatmapgen_test import generateGatedOutputsPlusHeatmap
 from db import loadOne, loadData, saveMeta, saveEntry, listArrayToJson
 from pathlib import Path, PurePath
 
-import asyncio
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy()) #Tornado won't work without this
+# import asyncio
+# asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy()) #Tornado won't work without this
 
 dirpath = PurePath.joinpath(Path().parent.absolute(),'data/raw/')
 
