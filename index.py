@@ -7,7 +7,8 @@ from preprocess import getColumnNames, getPlotData #, applyModel
 from heatmap import generateGatedOutputsPlusHeatmap
 from differences import generateDifferences
 from db import loadOne, loadData, saveMeta, saveEntry, listArrayToJson
-from helper import getFcsFilesToUse, getGatedHeatData, getGatedLineData
+from helper import getFcsFilesToUse, getGatedHeatData, getGatedLineData, getData
+from cluster import loadClusterImages
 from pathlib import Path, PurePath
 
 # import asyncio
@@ -125,14 +126,31 @@ class GenerateHeatmapHandler(BaseHandler):
 
         self.write(json.dumps(response))
 
-class TestHandler(BaseHandler):
+
+class ClusterPlotHandler(BaseHandler):
     def get(self):
         response = {"status":False}
 
-        df = getGatedLineData(["A02 Kranvatten kvall SYBR.fcs","A05 Kranvatten Sept SYBR .fcs","A02 Kranvatten Augusti SYBR.fcs","A03 Kranvatten Mars SYBR.fcs","A03 Kranvatten morgon SYBR.fcs"], 5,5,12,12)
+        size = int(self.get_query_argument("size"))
+        clusters = int(self.get_query_argument("clusters"))
+
+        response["status"] = True
+        response["payload"] = loadClusterImages(size, clusters)
+
+        self.write(json.dumps(response))
+
+class TestHandler(BaseHandler):
+    def get(self):
+        response = {"status":False}
+        
+        # # Sending to Hali
+        # df = getData(["A02 Kranvatten kvall SYBR-gate.csv","A05 Kranvatten Sept SYBR -gate.csv","A02 Kranvatten Augusti SYBR-gate.csv","A03 Kranvatten Mars SYBR-gate.csv","A03 Kranvatten morgon SYBR-gate.csv"], 5,5,12,12)
+
+        response["status"] = True
+        response["payload"] = loadClusterImages(9, 2)
 
         # print(df)
-        self.write(json.dumps(df))
+        self.write(json.dumps(response))
         # self.write(df)
 
 
@@ -254,6 +272,7 @@ if (__name__ == "__main__"):
         ("/saveUser/", SaveUserData),
         ("/loadLocations", GetLocationsHandler),
         ("/generateHeatmap/", GenerateHeatmapHandler),
+        ("/loadClusterPlots/", ClusterPlotHandler),
         ("/test/", TestHandler),
     ])
 
