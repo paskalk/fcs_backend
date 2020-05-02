@@ -37,7 +37,7 @@ def implementKMeans(data, noOfClusters, title):
     
     model = model.fit(data)
 
-    plt.figure(figsize=(7,5))
+    plt.figure(figsize=(8,6))
     plt.scatter(data.iloc[:,0], data.iloc[:,1], marker='.', s=250, c=model.labels_.astype(np.float))
     plt.title('Clustering using ' + title)
 #    plt.show    
