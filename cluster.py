@@ -142,5 +142,5 @@ def loadClusterImages(size, noOfClusters):
 #print(type(applyMds(fcsdata)))
 
 
-loadClusterImages(81, 2)
+# loadClusterImages(81, 2)
 
