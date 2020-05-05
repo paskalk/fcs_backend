@@ -42,7 +42,7 @@ def implementMain():
 
     for longfilename in filelist:
         print("Reading .fcs file ", longfilename)
-        shortfilename = longfilename.split('.')[0]
+        shortfilename = longfilename.split('.fcs')[0]
         sample = read_data(longfilename)
         
         channelnames = sample.channel_names
@@ -79,7 +79,7 @@ def getColumnNames(filename):
 
 def getPlotData(channelx, channely, transformation, filename):
     print("Reading selected columns from .fcs file ", filename)
-    shortfilename = filename.split('.')[0]
+    shortfilename = filename.split('.fcs')[0]
     sample = read_data(filename)
     
     data1 = ""

@@ -202,7 +202,8 @@ def generateGatedOutputsPlusHeatmap(listOfFiles, x1, y1, x2, y2, binwidth):
             generate_map(dframe, shortfilename, x1, y1, x2, y2, binwidth)
             print("Gating complete")
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
     
 

@@ -3,9 +3,11 @@ import json
 import numpy as np
 from pathlib import Path, PurePath
 import pandas as pd 
+import os
 
 dirpath = Path().parent.absolute()
 
+heatmapdatadir = PurePath.joinpath(dirpath,'data/heatmap/')
 gateddatadir = PurePath.joinpath(dirpath,'data/gated/')
 diffdatadir = PurePath.joinpath(dirpath,'data/diff/')
 
@@ -14,6 +16,28 @@ def read_data(filename, directorypath):
     datafile = PurePath.joinpath(directorypath, filename)   #gateddata.csv'
     df = pd.read_csv(datafile, header=None)      #, index_col=0)
     return df
+
+def clearGatedFiles():
+    try:
+        files = os.listdir(gateddatadir)
+        for file in files:
+            os.remove(PurePath.joinpath(gateddatadir, file))
+            
+        heatmapFiles = os.listdir(heatmapdatadir)
+        for file in heatmapFiles:
+            os.remove(PurePath.joinpath(heatmapdatadir, file))
+            
+    except Exception as e:
+        print(e)
+    
+
+def clearDiffFiles():
+    try:
+        files = os.listdir(diffdatadir)
+        for file in files:
+            os.remove(PurePath.joinpath(diffdatadir, file))
+    except Exception as e:
+        print(e)
 
 def getFcsFilesToUse(filestring, stringToAppend):
     fcsFiles = json.loads(filestring)

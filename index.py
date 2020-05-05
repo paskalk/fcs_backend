@@ -7,7 +7,7 @@ from preprocess import getColumnNames, getPlotData #, applyModel
 from heatmap import generateGatedOutputsPlusHeatmap
 from differences import generateDifferences
 from db import loadOne, loadData, saveMeta, saveEntry, listArrayToJson
-from helper import getFcsFilesToUse, getGatedHeatData, getGatedLineData, getData
+from helper import getFcsFilesToUse, getGatedHeatData, getGatedLineData, getData, clearDiffFiles, clearGatedFiles
 from cluster import loadClusterImages
 from pathlib import Path, PurePath
 
@@ -33,43 +33,46 @@ class UploadHandler(BaseHandler):
 
     def post(self): 
         response = {"status":False}
-        files = self.request.files["file"]
-        for f in files:
-            fpath = PurePath.joinpath(dirpath,f.filename) 
-            sizeBefore = 0
-            if (fpath.is_file()): #check if file exists already
-                sizeBefore = (fpath.stat().st_size)
+        try: 
+            files = self.request.files["file"]
+            for f in files:
+                fpath = PurePath.joinpath(dirpath,f.filename) 
+                sizeBefore = 0
+                if (fpath.is_file()): #check if file exists already
+                    sizeBefore = (fpath.stat().st_size)
 
-            if (sizeBefore == len(f.body)): #check if file is same size as saved file
-                response["message"] = f.filename + ' Already exists in the database'
-            else:
-                #Save the file in folder
-                fh = open(f"{fpath}", "wb") #wb is write in binary to accept any file format
-                fh.write(f.body)
-                fh.close()
-
-                colNames = getColumnNames(f.filename)
-                
-
-                if(colNames != False):
-                    #Write record to relational database
-                    sql = """INSERT INTO tbmeta(location,category,uploaddate,filename,uploadname,channels)
-                    VALUES(%s,%s,%s,%s,%s,%s) RETURNING id;"""
-                    values = []
-                    values.append(self.get_argument("location"))
-                    values.append(self.get_argument("category"))
-                    values.append(self.get_argument("dateTime"))
-                    values.append(f.filename.split('.')[0])
-                    values.append(f.filename)
-                    values.append(colNames)
-
-                    saveEntry(sql, values)
-
-                    response["status"] = True
+                if (sizeBefore == len(f.body)): #check if file is same size as saved file
+                    response["message"] = f.filename + ' Already exists in the database'
                 else:
-                    Path.unlink(fpath) #Remove the file if it had been saved
-                    response["message"] = f.filename + " is not a valid FCS file."
+                    #Save the file in folder
+                    fh = open(f"{fpath}", "wb") #wb is write in binary to accept any file format
+                    fh.write(f.body)
+                    fh.close()
 
+                    colNames = getColumnNames(f.filename)
+                    
+
+                    if(colNames != False):
+                        #Write record to relational database
+                        sql = """INSERT INTO tbmeta(location,category,uploaddate,filename,uploadname,channels)
+                        VALUES(%s,%s,%s,%s,%s,%s) RETURNING id;"""
+                        values = []
+                        values.append(self.get_argument("location"))
+                        values.append(self.get_argument("category"))
+                        values.append(self.get_argument("dateTime"))
+                        values.append(f.filename.split('.fcs')[0])
+                        values.append(f.filename)
+                        values.append(colNames)
+
+                        saveEntry(sql, values)
+
+                        response["status"] = True
+                    else:
+                        Path.unlink(fpath) #Remove the file if it had been saved
+                        response["message"] = f.filename + " is not a valid FCS file."
+        except Exception as e:
+            print(e)
+            response["message"] = e
         self.write(json.dumps(response))
 
 class PlotGraphHandler(BaseHandler):
@@ -82,7 +85,7 @@ class PlotGraphHandler(BaseHandler):
         filesList = getFcsFilesToUse(self.get_query_argument("allfcs"),".fcs")
         #Get all files
         ##loop through and prepare them for next step
-        print(filesList)
+        # print(filesList)
         for item in filesList:
             # print(item)
             # print(selectedFcsFile)
@@ -111,10 +114,12 @@ class GenerateHeatmapHandler(BaseHandler):
         selectedFiles = self.get_query_argument("allfcs")
         
         transformedFilesList = getFcsFilesToUse(selectedFiles,"out.csv")
+        clearGatedFiles()
         gates = generateGatedOutputsPlusHeatmap(transformedFilesList, x1, y1, x2, y2, binwidth)
 
         if(gates):
             gatedFilesList = getFcsFilesToUse(selectedFiles,"-gate.csv")
+            clearDiffFiles()
             results = generateDifferences(gatedFilesList)
             
             response["status"] = True

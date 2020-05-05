@@ -9,7 +9,7 @@ from pathlib import Path, PurePath
 from helper import getDataToCluster
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
-from sklearn import manifold
+from sklearn import manifold, preprocessing
 
 
 dirpath = Path().parent.absolute()
@@ -39,6 +39,10 @@ def implementKMeans(data, noOfClusters, title):
 
     plt.figure(figsize=(8,6))
     plt.scatter(data.iloc[:,0], data.iloc[:,1], marker='.', s=250, c=model.labels_.astype(np.float))
+    
+    for i, txt in enumerate(model.labels_):
+        plt.annotate(data.index[i], (data.iloc[i,0], data.iloc[i,1]), textcoords="offset points", xytext=(0,10), ha='center')
+        
     plt.title('Clustering using ' + title)
 #    plt.show    
     
@@ -62,6 +66,7 @@ def implementKMeans(data, noOfClusters, title):
 #    plt.yticks(range(len(v_df.index.values)))
 #    ax.set_xticklabels(v_df.columns.values, rotation=90)
 #    plt.colorbar();
+
 
 
 def applySvd(data):
@@ -88,7 +93,7 @@ def applySvd(data):
     
 
 def applyMds(data):
-    mds = manifold.MDS(n_components=2, dissimilarity="euclidean", random_state=5) #euclidean #Input is dissimalirity matrix if precomputed is used
+    mds = manifold.MDS(n_components=2, dissimilarity="euclidean", random_state=5) #euclidean 
     
     xyCoords = mds.fit(data)
 #   
@@ -98,49 +103,55 @@ def applyMds(data):
     return mdsDf
 
 def applyMdsPrecomputed(data):
-    mds = manifold.MDS(n_components=2, dissimilarity="precomputed") #Input is dissimalirity matrix if precomputed is used
+    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=5) #Input is dissimalirity matrix if precomputed is used
     
-    correlations = data.corr()
-    plt.matshow(correlations)
-    print(correlations)
+    correlations = pd.DataFrame(data).corr()
+#    plt.matshow(correlations)
+#    print(correlations)
     
     xyCoords = mds.fit(correlations.values)
 #   
-    #Positions of datasets in the embedding space
-    mdsDf = pd.DataFrame(xyCoords.embedding_)
+#    #Positions of datasets in the embedding space
+#    mdsDf = pd.DataFrame(xyCoords.embedding_)
     
-    return mdsDf
+    return xyCoords.embedding_
 
 def loadClusterImages(size, noOfClusters):
     
     filelist  = os.listdir(gateddatadir)  
     filesToDf = getDataToCluster(filelist, size)
     fcsdata = pd.DataFrame.transpose(pd.DataFrame(filesToDf))
+    idx = fcsdata.index
+    
+    # Scale the data
+    fcsdata = preprocessing.scale(fcsdata)
     
     svdData = applySvd(fcsdata)
-    mdsData = applyMds(fcsdata)
+#    mdsData = applyMds(fcsdata)
+    mdsData = applyMdsPrecomputed(filesToDf)
+    
+    mdsData = pd.DataFrame(mdsData)#, index = idx)
     
     base64Img = {}
     
     base64Img['svd'] = (implementKMeans(svdData, noOfClusters, 'SVD')).decode('utf-8')
-    base64Img['mds'] = (implementKMeans(mdsData, noOfClusters, 'MDS')).decode('utf-8')
+    base64Img['mds'] = (implementKMeans(mdsData, noOfClusters, 'NMDS')).decode('utf-8')
     
     return base64Img
 
 
-#plt.matshow(fcsdata.corr())
 
-#
-#
-#filelist  = os.listdir(diffdatadir)  
-#filesToDf = getDataToCluster(filelist, 9)
-#fcsdata = pd.DataFrame.transpose(pd.DataFrame(filesToDf))
-#
-#
-#y = applyMds(fcsdata)
-#
-#print(type(applyMds(fcsdata)))
+#loadClusterImages(9, 2)
 
 
-# loadClusterImages(81, 2)
+
+
+
+
+
+
+
+
+
+
 
