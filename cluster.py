@@ -103,7 +103,7 @@ def applyMds(data):
     return mdsDf
 
 def applyMdsPrecomputed(data):
-    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=5) #Input is dissimalirity matrix if precomputed is used
+    mds = manifold.MDS(n_components=2, metric = False, dissimilarity="precomputed", random_state=5) #Input is dissimalirity matrix if precomputed is used
     
     correlations = pd.DataFrame(data).corr()
 #    plt.matshow(correlations)
@@ -141,7 +141,7 @@ def loadClusterImages(size, noOfClusters):
 
 
 
-#loadClusterImages(9, 2)
+# loadClusterImages(9, 2)
 
 
 
