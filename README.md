@@ -36,3 +36,17 @@ Python index.py
 sudo apt-get install python-psycopg2
 sudo apt-get install python3-psycopg2
 ```
+
+## Setting Up the 
+This app runs best on Python 3*. To use it on Python 2*, you'll need the module 'Asyncio'
+
+Ubuntu
+```
+python -m -venv ~/env
+source ~/env/bin/activate (to activate venv)
+deactivate (to deactivate venv)
+```
+
+Windows
+```
+C:\Users\paska\Desktop\__temp_billogram\back

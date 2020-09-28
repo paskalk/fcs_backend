@@ -11,8 +11,8 @@ from helper import getFcsFilesToUse, getGatedHeatData, getGatedLineData, getData
 from cluster import loadClusterImages
 from pathlib import Path, PurePath
 
-# import asyncio
-# asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy()) #Tornado won't work without this
+import asyncio
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy()) #Tornado won't work without this
 
 dirpath = PurePath.joinpath(Path().parent.absolute(),'data/raw/')
 
